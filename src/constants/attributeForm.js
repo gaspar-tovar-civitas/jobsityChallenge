@@ -1,0 +1,3 @@
+export const ADD_ATTRIBUTE = 'ADD_ATTRIBUTE';
+export const DELETE_ATTRIBUTE = 'DELETE_ATTRIBUTE';
+export const DISABLE_SAVE = 'DISABLE_SAVE';

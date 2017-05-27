@@ -1,0 +1,18 @@
+.attribute {
+	padding-bottom: 5px;
+	border-bottom: 1px solid lightgray;
+}
+.attribute-closed {
+	height: 180px;
+	overflow: hidden;
+	margin-top: 13px;
+}
+.fieldset {
+	width: 100%;
+}
+.attribute-control-button {
+	float: right;
+}
+.attribute-delete-button {
+	float: left;
+}

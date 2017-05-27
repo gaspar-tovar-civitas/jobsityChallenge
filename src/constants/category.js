@@ -1,0 +1,2 @@
+export const GET_CATEGORY = 'GET_CATEGORY';
+export const MODIFY_CATEGORY = 'MODIFY_CATEGORY';

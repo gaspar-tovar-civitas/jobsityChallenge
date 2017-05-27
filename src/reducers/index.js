@@ -1,7 +1,10 @@
 import { combineReducers } from 'redux';
+import attributeFormReducer from './attributeForm';
+import categoryReducer from './category';
 
 const rootReducer = combineReducers({
-  state: (state = {}) => state
+  data: attributeFormReducer,
+  category: categoryReducer
 });
 
 export default rootReducer;
