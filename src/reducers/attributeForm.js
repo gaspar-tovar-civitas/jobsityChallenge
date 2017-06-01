@@ -8,7 +8,7 @@ const initialState = data;
 function attributeFormReducer(state = initialState, action) {
 	switch (action.type) {
 		case ADD_ATTRIBUTE:
-			const nextIndex = _.maxBy(state.data, 'id').id + 1;
+			const nextIndex = _.size(state.data) > 0 ? _.maxBy(state.data, 'id').id + 1 : 1;
 			action.data.id = nextIndex;
 			state.data.push(action.data);
 			return Object.assign({ data: state.data });

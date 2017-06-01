@@ -1,9 +1,10 @@
 .attribute {
 	padding-bottom: 5px;
 	border-bottom: 1px solid lightgray;
+	padding-top: 10px;
 }
 .attribute-closed {
-	height: 110px;
+	height: 135px;
 	overflow: hidden;
 	margin-top: 13px;
 }
@@ -12,9 +13,15 @@
 }
 .attribute-control-button {
 	float: right;
+	margin-bottom: 15px;
 }
 .attribute-delete-button {
 	float: left;
+	margin-bottom: 15px;
+}
+
+.button-holder {
+	margin-bottom: 15px;
 }
 
 .btn-remove {

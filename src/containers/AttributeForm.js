@@ -334,7 +334,7 @@ export class AttributeForm extends Component { // eslint-disable-line react/pref
 				className={classNames('attribute grid', {'attribute-closed': this._isClosed })}
 			>
 				<div className="container-fluid">
-					<div className="row">
+					<div className="row button-holder">
 						{deleteButton}
 						{closeButton}
 					</div>
