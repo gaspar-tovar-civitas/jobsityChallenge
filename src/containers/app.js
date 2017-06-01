@@ -38,6 +38,7 @@ export class App extends Component {
     const dataValues = this.props.data;
     
     let key = 0;
+    //Extract the tabs from the JSON
     const tabs =_.map(CATEGORIES, (attributes, category) => {
       key++;
       const attributesInCategory = _.partition(dataValues.data, { 'category': category });

@@ -7,6 +7,7 @@ import { connect } from 'react-redux';
 import { addAttribute, deleteAttribute } from '../actions/attributeForm';
 import { Glyphicon, Button } from 'react-bootstrap';
 const Form = t.form.Form;
+//Initial values of the form
 const FORM_INITIAL_VALUE = {
 	disableSave: false,
 	isObject: false,
@@ -50,43 +51,43 @@ export class AttributeForm extends Component { // eslint-disable-line react/pref
 	}
 
 	save() {
-		// call getValue() to get the values of the form
-		if (!this._isDuplicated) {
-			var value = this.refs.form.props.value;
-			// if validation fails, value will be null
-			if (value) {
-				// value here is an instance of Person
-				if(!value.name) {
-					this.setState({disableSave: true, nameError: true});
-					return false;
-				}
-
-				if (value.enumerations) {
-					_.pull(value.enumerations, '', undefined);
-				}
-				const extendedObject = {
-					category: this.props.category
-				}
-				this.props.addAttribute(Object.assign({}, value, extendedObject));
-				this.setState(FORM_INITIAL_VALUE);
+		var value = this.refs.form.props.value;
+		if (value) {
+			// Check if name is empty
+			if(!value.name) {
+				this.setState({disableSave: true, nameError: true});
+				return false;
 			}
+			// Delete empty values from enumerations array
+			if (value.enumerations) {
+				_.pull(value.enumerations, '', undefined);
+			}
+			// Add current category to the object
+			const extendedObject = {
+				category: this.props.category
+			}
+			this.props.addAttribute(Object.assign({}, value, extendedObject));
+			this.setState(FORM_INITIAL_VALUE);
 		}
 	}
 
+	// function to open and close information on the attribute
 	handleAttributeClick() {
 		this._isClosed= !this._isClosed;
 		this.forceUpdate();
 	}
-
+	// function to delete an attribute
 	handleDeleteClick() {
 		this.props.deleteAttribute(this.props.attribute.id);
 	}
 
 	onChange(formDataChanged, path) {
-			// validate a field on every change
+		// validate a field on every change
+		// if the component exists validate if its on the right values
 		if (this.refs.form.getComponent(path)) this.refs.form.getComponent(path).validate();
-
+		// check if dataType object was selected
 		const isObject = formDataChanged.dataType === 'object';
+		// reset values
 		const nullValues = {
 			defaultValue: null,
 			format: 'none'
@@ -104,6 +105,7 @@ export class AttributeForm extends Component { // eslint-disable-line react/pref
 				if(this.state.disableSave) {
 					this.setState({disableSave: false, nameError: false});
 				}
+				// check if name is duplicated
 				_.map(this.props.data.data, (attribute) => {
 					if (_.isMatch(attribute, { name: formData.name }) == true) {
 						this.setState({disableSave: true, nameError: true});
@@ -137,8 +139,6 @@ export class AttributeForm extends Component { // eslint-disable-line react/pref
 	_validateEnumeration() {
 		const enumerations = this.refs.form.getComponent('enumerations').props.value;
 		return (enumerations.length > 1 && !enumerations[enumerations.length-2]);
-
-
 	}
 
 	_validateNumberFormat() {
@@ -232,12 +232,10 @@ export class AttributeForm extends Component { // eslint-disable-line react/pref
 					disabled
 				},
 				deviceResourceType: {
-					disabled: true,
-					disabled
+					disabled: true
 				},
 				defaultValue: {
-					disabled: this.state.isObject,
-					disabled
+					disabled: this.state.isObject || disabled
 				},
 				dataType: {
 					nullOption: false,
@@ -245,8 +243,7 @@ export class AttributeForm extends Component { // eslint-disable-line react/pref
 				},
 				format: {
 					nullOption: false,
-					disabled: this.state.isObject,
-					disabled
+					disabled: this.state.isObject || disabled
 				},
 				rangeMin: {
 					type: numberFormat,
