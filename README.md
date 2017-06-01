@@ -1,7 +1,4 @@
-# ReduxSimpleStarter
-
-Interested in learning [Redux](https://www.udemy.com/react-redux/)?
-
+# JOBSITY TECHNICAL CHALLENGE
 ### Getting Started
 
 There are two methods for getting started with this repo.
