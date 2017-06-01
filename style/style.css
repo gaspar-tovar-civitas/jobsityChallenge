@@ -3,7 +3,7 @@
 	border-bottom: 1px solid lightgray;
 }
 .attribute-closed {
-	height: 180px;
+	height: 110px;
 	overflow: hidden;
 	margin-top: 13px;
 }
@@ -15,4 +15,25 @@
 }
 .attribute-delete-button {
 	float: left;
+}
+
+.btn-remove {
+	border-radius: 4px !important;
+	color: #fff !important;
+	background-color: #d9534f !important;
+	border-color: #d43f3a !important;
+}
+
+.btn-add {
+	color: #fff !important;
+	background-color: #5cb85c !important;
+	border-color: #4cae4c !important;
+}
+
+.hide {
+	display: none !important;
+}
+
+.show {
+	display: block;
 }

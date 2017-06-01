@@ -1,4 +1,4 @@
-import {ADD_ATTRIBUTE, DELETE_ATTRIBUTE, DISABLE_SAVE} from '../constants/attributeForm';
+import {ADD_ATTRIBUTE, DELETE_ATTRIBUTE} from '../constants/attributeForm';
 
 export function addAttribute(data) {
 	return {
@@ -8,18 +8,8 @@ export function addAttribute(data) {
 }
 
 export function deleteAttribute(id) {
-	console.log('=========  id  =========');
-	console.log(id);
-	console.log('=====  End of id>  =====');
 	return {
 		type: DELETE_ATTRIBUTE,
 		id
-	}
-}
-
-export function disableSave(disable) {
-	return {
-		type: DISABLE_SAVE,
-		disable
 	}
 }

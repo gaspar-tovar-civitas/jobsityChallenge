@@ -43,9 +43,8 @@ export class App extends Component {
       const attributesInCategory = _.partition(dataValues.data, { 'category': category });
       return <Tab eventKey={key} key={key} title={category}>
         {
-          _.map(attributesInCategory[0], (attribute) => {
-            key++;
-            return  <AttributeForm key={key}  attribute={attribute}/>
+          _.map(attributesInCategory[0], (attribute, index) => {
+            return  <AttributeForm key={index}  attribute={attribute}/>
           })
         }
         <AttributeForm key={key}/>
