@@ -4,24 +4,14 @@ import classNames from 'classnames';
 import t from 'tcomb-form';
 import _ from 'lodash';
 import { connect } from 'react-redux';
-import { addAttribute, deleteAttribute } from '../actions/attributeForm';
+import { addAttribute, updateAttribute, deleteAttribute } from '../actions/attributeForm';
 import { Glyphicon, Button } from 'react-bootstrap';
 const Form = t.form.Form;
 //Initial values of the form
-const FORM_INITIAL_VALUE = {
+const STATE_INITIAL_VALUE = {
 	disableSave: false,
 	isObject: false,
-	formData: {
-		name: '',
-		description: '',
-		deviceResourceType: '',
-		defaultValue: '',
-		dataType: 'string',
-		format: 'none',
-		enumerations: [''],
-		deviceResourceType: 'Default Value'
-	},
-	dataType: {
+		dataType: {
 		string: 'String',
 		object: 'Object'
 	},
@@ -34,7 +24,8 @@ const FORM_INITIAL_VALUE = {
 	},
 	name: false,
 	rangeError: false,
-	enumerationsError: false
+	enumerationsError: false,
+	isClosed: true
 };
 
 
@@ -46,39 +37,57 @@ export class AttributeForm extends Component { // eslint-disable-line react/pref
 		this.handleAttributeClick = _.bind(this.handleAttributeClick, this);
 		this.handleDeleteClick = _.bind(this.handleDeleteClick, this);
 		this.onChange = _.bind(this.onChange, this);
-		this._isClosed = true;
-		this.state = FORM_INITIAL_VALUE;
+		this.state = STATE_INITIAL_VALUE;
+		this._formData = {};
 	}
 
 	save() {
+
 		var value = this.refs.form.props.value;
 		if (value) {
-			// Check if name is empty
-			if(!value.name) {
-				this.setState({disableSave: true, nameError: true});
-				return false;
-			}
-			// Delete empty values from enumerations array
-			if (value.enumerations) {
-				_.pull(value.enumerations, '', undefined);
-			}
-			// Add current category to the object
-			const extendedObject = {
-				category: this.props.category
-			}
-			this.props.addAttribute(Object.assign({}, value, extendedObject));
-			this.setState(FORM_INITIAL_VALUE);
+		 // Check if name is empty
+		 if(!value.name) {
+			 this.setState({disableSave: true, nameError: true});
+			 return false;
+		 }
+		 // Delete empty values from enumerations array
+		 if (this._formData.enumerations) {
+		  _.pull(value.enumerations, '', undefined);
+		 }
+		 // Add current category to the object
+		}
+		const extendedObject = {
+			category: this.props.category,
+			isNew: false
+		}
+
+		this.props.updateAttribute(Object.assign(this._formData, extendedObject));
+		this.props.addEmptyAttribute(this.props.category);
+		this.setState({isClosed: true});
+	}
+
+	componentDidMount() {
+		if(this.props.attribute.isNew) {
+			this.setState({isClosed: false})
 		}
 	}
 
+
 	// function to open and close information on the attribute
 	handleAttributeClick() {
-		this._isClosed= !this._isClosed;
-		this.forceUpdate();
+		this.setState({isClosed: !this.state.isClosed});
 	}
 	// function to delete an attribute
 	handleDeleteClick() {
 		this.props.deleteAttribute(this.props.attribute.id);
+	}
+
+	componentWillUpdate(nextProps, nextState) {
+		if(nextProps.attribute.isNew == true && nextState.isClosed == true) {
+			this.setState({isClosed: false})
+			return true;
+		}
+		return false;
 	}
 
 	onChange(formDataChanged, path) {
@@ -95,7 +104,8 @@ export class AttributeForm extends Component { // eslint-disable-line react/pref
 		const disableSave = this._validateNumberFormat();
 		const enumerationsError = this._validateEnumeration();
 
-		let formData = isObject ? Object.assign(formDataChanged, nullValues) : formDataChanged;
+		let formData = Object.assign(this.props.attribute, formDataChanged)
+		formData = isObject ? Object.assign(formDataChanged, nullValues) : formData;
 		switch (path[0]) {
 			case 'dataType':
 				this.setState({isObject});
@@ -107,7 +117,7 @@ export class AttributeForm extends Component { // eslint-disable-line react/pref
 				}
 				// check if name is duplicated
 				_.map(this.props.data.data, (attribute) => {
-					if (_.isMatch(attribute, { name: formData.name }) == true) {
+					if (_.isMatch(attribute, { name: _.trim(formData.name) }) && !_.isMatch(attribute, { name: _.trim(formData.name), id: formData.id })) {
 						this.setState({disableSave: true, nameError: true});
 					}
 				})
@@ -133,7 +143,9 @@ export class AttributeForm extends Component { // eslint-disable-line react/pref
 				this.setState({disableSave: enumerationsError, enumerationsError})
 				break;
 		}
-		this.setState({formData});
+		 // Check if name is empty
+		this._formData = formData;
+		this.props.updateAttribute(formData);
 	}
 
 	_validateEnumeration() {
@@ -161,14 +173,17 @@ export class AttributeForm extends Component { // eslint-disable-line react/pref
 	}
 
 	render() {
-		var dataType = t.enums(this.state.dataType);
+		const disabled = !this.props.attribute.isNew;
+		var selectDataType= t.enums(this.state.dataType);
 		var selectFormat = t.enums(this.state.format);
+		const numberFormat = this.props.attribute.format == 'number';
+		const noneFormat = this.props.attribute.dataType != 'object' && this.props.attribute.format == 'none';
 		const attribute = t.struct({
 				name: t.String,
 				description: t.maybe(t.String),
 				deviceResourceType: t.maybe(t.String),
 				defaultValue: t.maybe(t.String),
-				dataType,
+				dataType: selectDataType,
 				format: selectFormat,
 				rangeMin: t.Number,
 				rangeMax: t.Number,
@@ -178,12 +193,7 @@ export class AttributeForm extends Component { // eslint-disable-line react/pref
 				enumerations: t.list(t.String)
 			}
 		);
-		const disabled = !_.isUndefined(this.props.attribute);
-		if (disabled) {
-			this.state.formData.format = this.props.attribute.format;
-		}
-		const numberFormat = this.state.formData.format == 'number';
-		const noneFormat = this.state.formData.dataType != 'object' && this.state.formData.format == 'none';
+
 		const formLayout = (locals) => {
 			return (
 				<div className="container-fluid" disabled="disabled">
@@ -278,23 +288,21 @@ export class AttributeForm extends Component { // eslint-disable-line react/pref
 				}
 			}
 		};
-		let value = {};
-		if(disabled) {
-			const {
-					name,
-					description,
-					deviceResourceType,
-					defaultValue,
-					format,
-					dataType,
-					rangeMin,
-					rangeMax,
-					unitOfMeasurement,
-					presicion,
-					accuracy,
-					enumerations
-				} = _.get(this.props, 'attribute');
-			value = {
+		const {
+				name,
+				description,
+				deviceResourceType,
+				defaultValue,
+				format,
+				dataType,
+				rangeMin,
+				rangeMax,
+				unitOfMeasurement,
+				presicion,
+				accuracy,
+				enumerations
+			} = _.get(this.props, 'attribute');
+			const value = {
 				name,
 				description,
 				deviceResourceType,
@@ -308,11 +316,7 @@ export class AttributeForm extends Component { // eslint-disable-line react/pref
 				accuracy,
 				enumerations
 			};
-		} else {
-			value = this.state.formData;
-			this._isClosed = false;
-		}
-		const glyph = this._isClosed ? 'down' : 'up';
+		const glyph = this.state.isClosed ? 'down' : 'up';
 		const saveButton = disabled ? null :
 			<Button disabled={this.state.disableSave} className="btn-primary" onClick={this.save}>
 				Save
@@ -328,7 +332,7 @@ export class AttributeForm extends Component { // eslint-disable-line react/pref
 
 		return (
 			<div
-				className={classNames('attribute grid', {'attribute-closed': this._isClosed })}
+				className={classNames('attribute grid', {'attribute-closed': this.state.isClosed })}
 			>
 				<div className="container-fluid">
 					<div className="row button-holder">
@@ -347,16 +351,17 @@ export class AttributeForm extends Component { // eslint-disable-line react/pref
 		</div>
 	);
 	}
-}
+};
 
 AttributeForm.propTypes = {
-	attribute: React.PropTypes.object
+	attribute: React.PropTypes.object,
+	enableForm: React.PropTypes.bool,
+	addEmptyAttribute: React.PropTypes.func,
 };
 
 const mapStateToProps = state => ({
 	data: state.data,
-	category: state.category.page
-
+	category: state.category.page,
 });
 
 const mapDispatchToProps = (dispatch) => {
@@ -364,11 +369,14 @@ const mapDispatchToProps = (dispatch) => {
 		addAttribute: (data) => {
 			dispatch(addAttribute(data));
 		},
+		updateAttribute: (data) => {
+			dispatch(updateAttribute(data));
+		},
 		deleteAttribute: (id) => {
 			dispatch(deleteAttribute(id));
-		}
+		},
 	}
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(AttributeForm)
+export default connect(mapStateToProps, mapDispatchToProps)(AttributeForm);
 

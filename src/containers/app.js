@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import { render } from 'react-dom';
-import {connect} from 'react-redux';
+import { connect } from 'react-redux';
 import _ from 'lodash';
 import styled from 'styled-components';
 import { Tabs, Tab, Row, Col, Grid, PageHeader } from 'react-bootstrap';
@@ -9,29 +8,52 @@ import { Tabs, Tab, Row, Col, Grid, PageHeader } from 'react-bootstrap';
 import AttributeForm from './AttributeForm';
 import data from '../data/data.json';
 import { modifyCategory } from '../actions/category';
+import { addAttribute } from '../actions/attributeForm';
+
 const JSONArea = styled.textarea`
                   width: 100%;
                   height: 1000px;`;
 const CATEGORIES = _.groupBy(data.data, 'category');
+
+const FORM_INITIAL_VALUE = {
+  formData: {
+    name: '',
+    description: '',
+    deviceResourceType: '',
+    defaultValue: '',
+    dataType: 'string',
+    format: 'none',
+    enumerations: [''],
+    deviceResourceType: 'Default Value',
+    isNew: true,
+  }
+};
 
 export class App extends Component {
 
   constructor(props) {
     super(props);
     this.updateCategory = _.bind(this.updateCategory, this);
+    this.addEmptyAttribute = _.bind(this.addEmptyAttribute, this);
   }
 
-  componentDidMount() {
+  componentWillMount() {
     this.updateCategory(1);
+    this.addEmptyAttribute();
+    _.map(CATEGORIES, (attributes, category) => {
+      this.addEmptyAttribute(category);
+    });
   }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return true;
-  }
-
 
   updateCategory(key) {
     this.props.modifyCategory(Object.keys(CATEGORIES)[key-1]);
+  }
+
+  addEmptyAttribute(category) {
+    const extendedObject = {
+      category,
+    }
+    this.props.addAttribute(Object.assign({}, FORM_INITIAL_VALUE.formData, extendedObject));
   }
 
   render() {
@@ -44,11 +66,13 @@ export class App extends Component {
       const attributesInCategory = _.partition(dataValues.data, { 'category': category });
       return <Tab eventKey={key} key={key} title={category}>
         {
-          _.map(attributesInCategory[0], (attribute, index) => {
-            return  <AttributeForm key={index}  attribute={attribute}/>
+          _.map(attributesInCategory[0], (attribute, index) =>{
+            if(index > (_.size(attributesInCategory[0]) - 1)) {
+              attribute.isNew = false;
+            }
+            return  <AttributeForm key={index} attribute={attribute} addEmptyAttribute={this.addEmptyAttribute}/>
           })
         }
-        <AttributeForm key={key}/>
       </Tab>
     });
     return (
@@ -65,7 +89,7 @@ export class App extends Component {
             </Tabs>
           </Col>
           <Col xs={6}>
-            <JSONArea value={JSON.stringify(dataValues)} disabled />
+            <JSONArea value={JSON.stringify(dataValues, null, '\t')} disabled />
           </Col>
         </Row>
       </Grid>
@@ -79,10 +103,13 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = (dispatch) => {
   return {
+    addAttribute: (data) => {
+      dispatch(addAttribute(data));
+    },
     modifyCategory: (page) => {
       return dispatch(modifyCategory(page));
-    }
-  }
-}
+    },
+  };
+};
 
-export default connect(mapStateToProps, mapDispatchToProps)(App)
+export default connect(mapStateToProps, mapDispatchToProps)(App);
