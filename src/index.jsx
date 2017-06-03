@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import "bootstrap-sass/assets/stylesheets/_bootstrap.scss";
+import 'bootstrap-sass/assets/stylesheets/_bootstrap.scss';
 
 import { Provider } from 'react-redux';
 import { createStore, applyMiddleware } from 'redux';

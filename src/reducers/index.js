@@ -4,7 +4,7 @@ import categoryReducer from './category';
 
 const rootReducer = combineReducers({
   data: attributeFormReducer,
-  category: categoryReducer
+  category: categoryReducer,
 });
 
 export default rootReducer;

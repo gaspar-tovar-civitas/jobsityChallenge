@@ -19,14 +19,13 @@ const FORM_INITIAL_VALUE = {
   formData: {
     name: '',
     description: '',
-    deviceResourceType: '',
     defaultValue: '',
     dataType: 'string',
     format: 'none',
     enumerations: [''],
     deviceResourceType: 'Default Value',
     isNew: true,
-  }
+  },
 };
 
 export class App extends Component {
@@ -46,40 +45,47 @@ export class App extends Component {
   }
 
   updateCategory(key) {
-    this.props.modifyCategory(Object.keys(CATEGORIES)[key-1]);
+    this.props.modifyCategory(Object.keys(CATEGORIES)[key - 1]);
   }
 
   addEmptyAttribute(category) {
     const extendedObject = {
       category,
-    }
+    };
     this.props.addAttribute(Object.assign({}, FORM_INITIAL_VALUE.formData, extendedObject));
   }
 
   render() {
     const dataValues = this.props.data;
-    
     let key = 0;
-    //Extract the tabs from the JSON
-    const tabs =_.map(CATEGORIES, (attributes, category) => {
-      key++;
-      const attributesInCategory = _.partition(dataValues.data, { 'category': category });
-      return <Tab eventKey={key} key={key} title={category}>
+    //  Extract the tabs from the JSON
+    const tabs = _.map(CATEGORIES, (attributes, category) => {
+      key += 1;
+      const attributesInCategory = _.partition(dataValues.data, { category });
+      return (<Tab eventKey={key} key={key} title={category} >
         {
-          _.map(attributesInCategory[0], (attribute, index) =>{
-            if(index > (_.size(attributesInCategory[0]) - 1)) {
+          _.map(attributesInCategory[0], (attribute, index) => {
+            if (index > (_.size(attributesInCategory[0]) - 1)) {
               attribute.isNew = false;
             }
-            return  <AttributeForm key={index} attribute={attribute} addEmptyAttribute={this.addEmptyAttribute}/>
+            return (
+              <AttributeForm
+                key={index}
+                attribute={attribute}
+                addEmptyAttribute={this.addEmptyAttribute}
+              />
+            );
           })
         }
-      </Tab>
+      </Tab>);
     });
     return (
       <Grid className="container">
         <Row>
           <Col xs={12} className="text-center">
-            <PageHeader>Jobsity test<small> Technical Test for Jobsity React Dev</small></PageHeader>
+            <PageHeader>
+              Jobsity test<small> Technical Test for Jobsity React Dev</small>
+            </PageHeader>
           </Col>
         </Row>
         <Row>
@@ -98,7 +104,7 @@ export class App extends Component {
 }
 const mapStateToProps = state => ({
   data: state.data,
-  page: state.category.page
+  page: state.category.page,
 });
 
 const mapDispatchToProps = (dispatch) => {
@@ -107,7 +113,7 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(addAttribute(data));
     },
     modifyCategory: (page) => {
-      return dispatch(modifyCategory(page));
+      dispatch(modifyCategory(page));
     },
   };
 };
